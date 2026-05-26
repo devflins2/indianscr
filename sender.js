@@ -245,52 +245,22 @@ async function sendVideoToGroup(video) {
     const downloadSource = await getDirectDownloadUrl(video.id);
 
     if (!downloadSource || !downloadSource.url) {
-      log(`⚠️ No download URL available for ${video.id}. Sending link only.`);
-
-      // Send as text message with link instead
-      const caption = buildCaption(video);
-      const groupEntity = await resolveGroupEntity();
-
-      await telegramClient.sendMessage(groupEntity, {
-        message: caption,
-        parseMode: 'md',
-        linkPreview: true,
-      });
-
-      log(`✅ Sent link message for: ${video.id}`);
-      return true;
+      log(`⚠️ No download URL available for ${video.id}. Skipping.`);
+      return false;
     }
 
     // Step 2: Check file size
     if (downloadSource.filesize > config.limits.maxFileSizeBytes) {
-      log(`⚠️ File too large (${formatBytes(downloadSource.filesize)}). Sending link only.`);
-
-      const caption = buildCaption(video) + `\n\n📦 **Size:** ${formatBytes(downloadSource.filesize)} (too large to upload)`;
-      const groupEntity = await resolveGroupEntity();
-
-      await telegramClient.sendMessage(groupEntity, {
-        message: caption,
-        parseMode: 'md',
-      });
-
-      return true;
+      log(`⚠️ File too large (${formatBytes(downloadSource.filesize)}). Skipping.`);
+      return false;
     }
 
     // Step 3: Download the video
     filePath = await downloadVideo(downloadSource.url, video.id);
 
     if (!filePath) {
-      log(`⚠️ Download failed for ${video.id}. Sending link instead.`);
-
-      const caption = buildCaption(video);
-      const groupEntity = await resolveGroupEntity();
-
-      await telegramClient.sendMessage(groupEntity, {
-        message: caption,
-        parseMode: 'md',
-      });
-
-      return true;
+      log(`⚠️ Download failed for ${video.id}. Skipping.`);
+      return false;
     }
 
     // Verify file exists and has content
