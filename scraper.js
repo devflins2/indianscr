@@ -50,10 +50,12 @@ async function fetchPage(query, page = 1) {
   try {
     const axiosOptions = {
       params,
-      timeout: 30000,
+      timeout: 60000, // increased from 30s to 60s to prevent stream abort
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
       },
     };
 
@@ -155,9 +157,12 @@ async function getDirectDownloadUrl(videoId) {
     log(`Fetching direct download URL for video ${videoId}...`);
 
     const axiosOptions = {
-      timeout: 30000,
+      timeout: 60000, // increased from 30s to 60s
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
       },
     };
 
@@ -303,7 +308,8 @@ async function fetchAllVideos(query, sentVideoIds = new Set(), startPage = 1, ma
         currentPage++;
         retryCount = 0;
       } else {
-        await countdown(10, `Retry cooldown`);
+        // Increased from 10s to 20s — gives API server more time to recover from 503
+        await countdown(20, `Retry cooldown`);
       }
     }
   }
